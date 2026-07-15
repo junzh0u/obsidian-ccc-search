@@ -1,0 +1,9 @@
+{
+	"id": "ccc-search",
+	"name": "CCC Semantic Search",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Semantic search of your vault via ccc (cocoindex-code).",
+	"author": "Jun Zhou",
+	"isDesktopOnly": true
+}
