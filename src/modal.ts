@@ -24,6 +24,7 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 	private pendingDebounce: ((proceed: boolean) => void) | null = null;
 	private abortController: AbortController | null = null;
 	private firstQuery = true;
+	private spinnerEl: HTMLElement;
 
 	constructor(app: App, plugin: CccSearchPlugin) {
 		super(app);
@@ -32,6 +33,11 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 		this.vaultPath = adapter instanceof FileSystemAdapter ? adapter.getBasePath() : null;
 		this.setPlaceholder("Semantic search…");
 		this.emptyStateText = "No results.";
+		this.spinnerEl = (this.inputEl.parentElement ?? this.modalEl).createDiv({
+			cls: "ccc-search-spinner",
+			attr: { "aria-hidden": "true" },
+		});
+		this.spinnerEl.hide();
 	}
 
 	onOpen(): void {
@@ -85,6 +91,7 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 		this.abortController?.abort();
 		const controller = new AbortController();
 		this.abortController = controller;
+		this.spinnerEl.show();
 
 		const isFirst = this.firstQuery;
 		this.firstQuery = false;
@@ -115,6 +122,10 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 			new Notice(err instanceof Error ? err.message : String(err));
 			return [];
 		} finally {
+			// A superseding query re-shows the spinner and owns hiding it.
+			if (this.abortController === controller) {
+				this.spinnerEl.hide();
+			}
 			this.emptyStateText = "No results.";
 		}
 	}
