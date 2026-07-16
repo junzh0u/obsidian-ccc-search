@@ -15,6 +15,7 @@ export default class CccSearchPlugin extends Plugin {
 		this.addCommand({
 			id: "search-vault-semantically",
 			name: "Search vault semantically",
+			hotkeys: [{ modifiers: ["Mod", "Shift"], key: "s" }],
 			callback: () => {
 				new CccSearchModal(this.app, this).open();
 			},

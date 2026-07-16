@@ -59,6 +59,29 @@ export class CccSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName("Hotkey")
+			.setDesc(
+				"Shortcut to open semantic search. Defaults to Cmd/Ctrl+Shift+S; " +
+					"change it in Obsidian's hotkey settings."
+			)
+			.addButton((btn) =>
+				btn.setButtonText("Configure").onClick(() => {
+					// Undocumented API: open the Hotkeys tab pre-filtered to this plugin.
+					const setting = (
+						this.app as unknown as {
+							setting: {
+								open(): void;
+								openTabById(id: string): { setQuery?(query: string): void } | null;
+							};
+						}
+					).setting;
+					setting.open();
+					const tab = setting.openTabById("hotkeys");
+					tab?.setQuery?.(this.plugin.manifest.name);
+				})
+			);
+
+		new Setting(containerEl)
 			.setName("Result limit")
 			.setDesc("Maximum number of results per query.")
 			.addText((text) =>
