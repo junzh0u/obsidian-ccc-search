@@ -30,7 +30,7 @@ Without [`just`](https://github.com/casey/just): `bun install && bun run build`,
 
 ## Use
 
-- Click the **sparkles** ribbon icon, or run the command **"Search vault semantically"**.
+- Click the **sparkles** ribbon icon, or run the command **"Search vault semantically"** (no default hotkey — assign one under **Settings → Hotkeys**).
 - Type a natural-language query ("that bank statement about the mortgage", "notes on daemon lifecycle design") — results show the note title, path, relevance score, and a frontmatter-free snippet.
 - **Enter** opens the note at the matching section; **Cmd/Ctrl-Enter** opens it in a new tab.
 
