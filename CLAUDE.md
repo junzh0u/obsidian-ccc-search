@@ -20,7 +20,7 @@ There are no tests. `install-vault` needs `OBSIDIAN_VAULT` set (env or local `.e
 
 ## Architecture
 
-Data flow: `main.ts` (plugin entry: ribbon icon, command with default hotkey, settings) → `modal.ts` (`CccSearchModal extends SuggestModal`) → `ccc-client.ts` (`execFile` wrapper) → `ccc` binary → JSON parsed into `types.ts` shapes.
+Data flow: `main.ts` (plugin entry: ribbon icon, command, settings) → `modal.ts` (`CccSearchModal extends SuggestModal`) → `ccc-client.ts` (`execFile` wrapper) → `ccc` binary → JSON parsed into `types.ts` shapes.
 
 Query lifecycle in `modal.ts::getSuggestions` — the subtle part:
 1. **Debounce (250 ms)** is promise-based: a newer keystroke resolves the pending debounce with `false`, and that superseded call returns early.
@@ -34,7 +34,9 @@ Query lifecycle in `modal.ts::getSuggestions` — the subtle part:
 
 Other conventions:
 - ccc line numbers are 1-based; Obsidian `eState.line` is 0-based (converted in `onChooseSuggestion`).
-- The settings tab's "Configure" hotkey button uses the undocumented `app.setting.openTabById("hotkeys")` API.
+- Obsidian's community-plugin review rules bind this repo: no default hotkeys on commands, no private/undocumented APIs, sentence case in UI text, no `innerHTML` (use `createEl`/`createDiv`/`createSpan`). A default hotkey and an `app.setting.openTabById` shortcut were both removed for this reason — don't reintroduce them.
+- `minAppVersion` is 1.5.7 because `modal.ts` uses `Vault.getFileByPath`. Raise it (in both `manifest.json` and `versions.json`) if newer APIs are adopted.
+- Releases: push a tag matching `manifest.json`'s version exactly, no `v` prefix (`0.1.0`). `.github/workflows/release.yml` verifies the match, builds, and attaches `main.js`/`manifest.json`/`styles.css` — Obsidian requires those three as release assets.
 - `styles.css` uses only Obsidian theme variables (`--size-*`, `--text-muted`, `--interactive-accent`, …); all classes are `ccc-`prefixed.
 - Node builtins (`child_process`, `os`, `path`) are fine — desktop-only plugin (`isDesktopOnly: true`), and esbuild marks builtins external.
 - `manifest.json` + `versions.json` follow Obsidian's plugin release scheme; keep `package.json` version in sync with `manifest.json`.
