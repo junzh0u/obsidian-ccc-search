@@ -35,6 +35,7 @@ Query lifecycle in `modal.ts::getSuggestions` — the subtle part:
 Other conventions:
 - ccc line numbers are 1-based; Obsidian `eState.line` is 0-based (converted in `onChooseSuggestion`).
 - Obsidian's community-plugin review rules bind this repo: no default hotkeys on commands, no private/undocumented APIs, sentence case in UI text, no `innerHTML` (use `createEl`/`createDiv`/`createSpan`). A default hotkey and an `app.setting.openTabById` shortcut were both removed for this reason — don't reintroduce them.
+- `settings.ts` renders twice over: `getSettingDefinitions()` (declarative, 1.13+, and the only path that feeds Obsidian's settings search) and `display()` (deprecated, kept as the pre-1.13 fallback). Add or change a setting in both — shared desc strings and `testBinary()` are factored out to keep them honest. Drop `display()` only if `minAppVersion` ever reaches 1.13.0.
 - `minAppVersion` is 1.5.7 because `modal.ts` uses `Vault.getFileByPath`. Raise it (in both `manifest.json` and `versions.json`) if newer APIs are adopted.
 - Releases: push a tag matching `manifest.json`'s version exactly, no `v` prefix (`0.1.0`). `.github/workflows/release.yml` verifies the match, builds, and attaches `main.js`/`manifest.json`/`styles.css` — Obsidian requires those three as release assets.
 - `styles.css` uses only Obsidian theme variables (`--size-*`, `--text-muted`, `--interactive-accent`, …); all classes are `ccc-`prefixed.
