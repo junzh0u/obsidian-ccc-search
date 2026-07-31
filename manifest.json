@@ -1,7 +1,7 @@
 {
 	"id": "ccc-search",
 	"name": "CCC Semantic Search",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.5.7",
 	"description": "Semantic search of your vault via ccc (cocoindex-code).",
 	"author": "Jun Zhou",
