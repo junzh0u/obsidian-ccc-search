@@ -20,7 +20,7 @@ function makeSnippet(content: string): string {
 export class CccSearchModal extends SuggestModal<CccSearchResult> {
 	private plugin: CccSearchPlugin;
 	private vaultPath: string | null;
-	private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	private debounceTimer: number | null = null;
 	private pendingDebounce: ((proceed: boolean) => void) | null = null;
 	private abortController: AbortController | null = null;
 	private firstQuery = true;
@@ -42,12 +42,12 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 
 	onOpen(): void {
 		this.firstQuery = true;
-		super.onOpen();
+		void super.onOpen();
 	}
 
 	onClose(): void {
 		if (this.debounceTimer !== null) {
-			clearTimeout(this.debounceTimer);
+			window.clearTimeout(this.debounceTimer);
 			this.debounceTimer = null;
 		}
 		this.pendingDebounce?.(false);
@@ -61,11 +61,11 @@ export class CccSearchModal extends SuggestModal<CccSearchResult> {
 	private debounce(): Promise<boolean> {
 		return new Promise((resolve) => {
 			if (this.debounceTimer !== null) {
-				clearTimeout(this.debounceTimer);
+				window.clearTimeout(this.debounceTimer);
 			}
 			this.pendingDebounce?.(false);
 			this.pendingDebounce = resolve;
-			this.debounceTimer = setTimeout(() => {
+			this.debounceTimer = window.setTimeout(() => {
 				this.debounceTimer = null;
 				this.pendingDebounce = null;
 				resolve(true);
