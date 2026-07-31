@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-ccc-search",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Semantic search of your Obsidian vault via ccc (cocoindex-code).",
 	"type": "module",
 	"main": "main.js",
