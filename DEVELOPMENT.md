@@ -57,4 +57,12 @@ git tag 0.1.2 && git push origin 0.1.2
 
 The tag must match `manifest.json`'s version exactly, with no `v` prefix — `.github/workflows/release.yml` verifies that, builds, and attaches `main.js`, `manifest.json`, and `styles.css` to a GitHub release. Obsidian installs from those three assets.
 
+The workflow also signs a build provenance attestation for each asset, so anyone can confirm a downloaded file was built by this workflow from this repo rather than uploaded by hand:
+
+```sh
+gh attestation verify main.js --repo junzh0u/obsidian-ccc-search
+```
+
+That only works for assets built by the workflow — never attach release assets manually.
+
 Once published, the community directory picks up new releases automatically; re-submission is only needed for review feedback, which appears on the plugin's entry at [community.obsidian.md](https://community.obsidian.md), not on this repo.
