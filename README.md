@@ -10,7 +10,7 @@ The plugin is a thin client: each query shells out to `ccc search --json` with t
 
 - **Desktop only** (spawns a local process).
 - **`ccc` (cocoindex-code) installed** and on your `PATH` (or at `~/.local/bin/ccc`, or configured in the plugin settings).
-  - The plugin needs a ccc version with the `--json` flag on `ccc search`. As of now that flag is not yet in a released version — it requires a build that includes it.
+  - Requires **v0.2.38 or newer** — that release added the `--json` flag to `ccc search`, which the plugin depends on.
 - **Your vault initialized and indexed** by ccc: run `ccc init` then `ccc index` in the vault directory once. The plugin keeps the index fresh afterwards via incremental refresh on search (configurable).
 
 ## Install
