@@ -1,66 +1,73 @@
 # CCC Semantic Search
 
-An [Obsidian](https://obsidian.md) plugin for **semantic search** of your vault, powered by [cocoindex-code](https://github.com/cocoindex-io/cocoindex-code) (`ccc`). Find notes by meaning, not just keywords — a quick-switcher-style modal that queries a local AST/embedding index. Everything runs on your machine; no cloud calls are made by the plugin itself (whether embedding is local or via an API depends on your `ccc` configuration).
+Find notes by **meaning**, not just keywords. A quick-switcher-style modal that searches your [Obsidian](https://obsidian.md) vault semantically — type "that bank statement about the mortgage" and get the note, even if it never uses those words.
 
-## How it works
+Search runs on your machine, powered by [cocoindex-code](https://github.com/cocoindex-io/cocoindex-code) (`ccc`).
 
-The plugin is a thin client: each query shells out to `ccc search --json` with the vault as the working directory. The heavy lifting — embedding model, index, incremental refresh — lives in ccc's shared background daemon, so warm queries return in ~100–160 ms, imperceptible behind the modal's 250 ms debounce. The plugin never manages the daemon; ccc auto-starts it on demand.
+## Before you install
 
-## What it accesses
+This plugin is a front end for `ccc`, a separate command-line tool you install yourself. Without it the plugin can't search.
 
-- **Runs a local program.** Every query spawns the `ccc` executable as a child process. You install and update ccc yourself; the plugin never downloads, installs, or updates it.
-- **Reads outside the vault.** It looks for the `ccc` binary on your `PATH` and at `~/.local/bin/ccc` (or wherever you point it in settings). ccc itself stores its index outside the vault, under its own data directory.
-- **Network.** The plugin makes no network requests of its own and collects no telemetry. Whether *ccc* reaches the network depends on your ccc configuration: with a local embedding model nothing leaves your machine; if you configure an API-based embedding provider, ccc sends your query text — and, when indexing, your note content — to that provider.
+1. **Desktop only.** The plugin runs a local program, which Obsidian mobile doesn't allow.
+2. **Install `ccc` v0.2.38 or newer.** With [uv](https://docs.astral.sh/uv/):
 
-## Requirements
+   ```sh
+   uv tool install --upgrade 'cocoindex-code[full]'
+   ```
 
-- **Desktop only** (spawns a local process).
-- **`ccc` (cocoindex-code) installed** and on your `PATH` (or at `~/.local/bin/ccc`, or configured in the plugin settings).
-  - Requires **v0.2.38 or newer** — that release added the `--json` flag to `ccc search`, which the plugin depends on.
-- **Your vault initialized and indexed** by ccc: run `ccc init` then `ccc index` in the vault directory once. The plugin keeps the index fresh afterwards via incremental refresh on search (configurable).
+   That puts `ccc` in `~/.local/bin`, where the plugin finds it automatically. For other install methods see the [cocoindex-code README](https://github.com/cocoindex-io/cocoindex-code); anywhere on your `PATH` works, and other locations you can point at in the plugin settings.
+3. **Index your vault once.** In a terminal, from your vault folder:
+
+   ```sh
+   cd /path/to/YourVault
+   ccc init
+   ccc index
+   ```
+
+   Indexing a large vault takes a while the first time. After that the plugin keeps the index current for you.
 
 ## Install
 
-Not in the community plugin registry (yet). Manual install:
-
-```sh
-git clone https://github.com/junzh0u/obsidian-ccc-search
-cd obsidian-ccc-search
-just install          # bun install
-just vault=/path/to/YourVault install-vault
-```
-
-`install-vault` builds and copies `main.js`, `manifest.json`, and `styles.css` into `YourVault/.obsidian/plugins/ccc-search/`. Then in Obsidian: **Settings → Community plugins → enable "CCC Semantic Search"** (turn off Restricted mode first if needed).
-
-Without [`just`](https://github.com/casey/just): `bun install && bun run build`, then copy the three files manually.
+Open [the plugin page](https://community.obsidian.md/plugins/ccc-search) and click **Add to Obsidian**, or from inside the app: **Settings → Community plugins → Browse**, search for *CCC Semantic Search*, then **Install** and **Enable**. (If Obsidian is in Restricted mode, turn that off first.)
 
 ## Use
 
-- Click the **sparkles** ribbon icon, or run the command **"Search vault semantically"** (no default hotkey — assign one under **Settings → Hotkeys**).
-- Type a natural-language query ("that bank statement about the mortgage", "notes on daemon lifecycle design") — results show the note title, path, relevance score, and a frontmatter-free snippet.
-- **Enter** opens the note at the matching section; **Cmd/Ctrl-Enter** opens it in a new tab.
+Click the **sparkles** ribbon icon, or run the command **"Search vault semantically"** from the command palette. There's no default hotkey — assign your own under **Settings → Hotkeys**.
 
-The first query after a cold start (reboot, daemon idle-exit) can take a while — ccc loads the embedding model. The modal shows a warming-up hint; subsequent queries are fast.
+Type a natural-language query. Each result shows the note title, its path, a relevance score, and a snippet of the matching text.
+
+- **Enter** — open the note, scrolled to the matching section
+- **Cmd/Ctrl-Enter** — open it in a new tab
+
+**The first search after starting your computer can take up to a minute.** `ccc` is loading its language model; the modal shows a "warming up" hint while it does. Every search after that returns in a fraction of a second.
 
 ## Settings
 
-| Setting | Default | Description |
+| Setting | Default | What it does |
 |---|---|---|
-| ccc binary path | auto-detect | Path to the `ccc` executable. Empty = look on `PATH`, then `~/.local/bin/ccc`. The **Test** button verifies the binary responds. |
-| Result limit | 10 | Maximum results per query. |
-| Refresh on search | on | Run an incremental index refresh on the first query each time the modal opens, so recent edits are searchable. |
-| Minimum score | 0 | Hide results scoring below this value (0 disables the filter). |
+| ccc binary path | auto-detect | Where your `ccc` executable lives. Leave empty to look on `PATH`, then `~/.local/bin/ccc`. **Test ccc binary** confirms the plugin can reach it. |
+| Result limit | 10 | How many results a search returns. |
+| Refresh index on search | on | Pick up recent edits: the first search each time you open the modal refreshes the index. Turn off if you'd rather reindex manually with `ccc index`. |
+| Minimum score | 0 | Hide weak matches below this relevance score. 0 shows everything. |
 
-## Development
+## Troubleshooting
 
-```sh
-just install   # bun install
-just check     # tsc --noEmit
-just build     # type check + esbuild production bundle
-just dev       # esbuild watch mode
-```
+**"ccc not found" or the Test button fails.** Obsidian launched from Finder or the Start menu doesn't inherit your shell's `PATH`, so a `ccc` that works in your terminal may still be invisible to the plugin. Run `which ccc` in a terminal and paste the full path into the ccc binary path setting.
 
-TypeScript + esbuild, [bun](https://bun.sh) as runtime/package manager, no runtime dependencies.
+**No results, or results from notes you deleted.** The index is stale. Make sure "Refresh index on search" is on, or run `ccc index` in your vault folder.
+
+**Every search is slow, not just the first.** `ccc`'s background daemon is likely restarting each time. Check that `ccc search "test"` is fast on the second run in a terminal.
+
+## Privacy
+
+- **The plugin makes no network requests and collects no telemetry.** It runs `ccc` on your machine and reads the results.
+- **Whether `ccc` uses the network is your choice.** Configured with a local embedding model, nothing leaves your computer. If you configure `ccc` with an API-based embedding provider, it sends your search queries — and your note contents while indexing — to that provider.
+- **Files outside your vault.** The plugin looks for the `ccc` executable on your `PATH` and at `~/.local/bin/ccc`. `ccc` keeps its search index in its own data directory, outside the vault.
+- The plugin never downloads, installs, or updates `ccc`; that's yours to manage.
+
+## Contributing
+
+Bug reports and pull requests are welcome — see [DEVELOPMENT.md](DEVELOPMENT.md) for the build setup and architecture.
 
 ## License
 
