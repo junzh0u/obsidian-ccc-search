@@ -6,6 +6,12 @@ An [Obsidian](https://obsidian.md) plugin for **semantic search** of your vault,
 
 The plugin is a thin client: each query shells out to `ccc search --json` with the vault as the working directory. The heavy lifting — embedding model, index, incremental refresh — lives in ccc's shared background daemon, so warm queries return in ~100–160 ms, imperceptible behind the modal's 250 ms debounce. The plugin never manages the daemon; ccc auto-starts it on demand.
 
+## What it accesses
+
+- **Runs a local program.** Every query spawns the `ccc` executable as a child process. You install and update ccc yourself; the plugin never downloads, installs, or updates it.
+- **Reads outside the vault.** It looks for the `ccc` binary on your `PATH` and at `~/.local/bin/ccc` (or wherever you point it in settings). ccc itself stores its index outside the vault, under its own data directory.
+- **Network.** The plugin makes no network requests of its own and collects no telemetry. Whether *ccc* reaches the network depends on your ccc configuration: with a local embedding model nothing leaves your machine; if you configure an API-based embedding provider, ccc sends your query text — and, when indexing, your note content — to that provider.
+
 ## Requirements
 
 - **Desktop only** (spawns a local process).
